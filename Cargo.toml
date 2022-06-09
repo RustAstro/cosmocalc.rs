@@ -1,0 +1,14 @@
+[package]
+name = "cosmocalc"
+version = "0.1.0"
+authors = [ "redshiftzero" ]
+description = "A library for cosmological physics calculations"
+repository = "https://github.com/redshiftzero/cosmocalc.rs"
+keywords = ["cosmology", "physics", "astronomy"]
+categories = ["physics"]
+include = ["Cargo.toml", "src", "README.md"]
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+once_cell = "1.8"
