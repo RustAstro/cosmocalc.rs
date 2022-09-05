@@ -2,11 +2,12 @@
 pub mod constants;
 pub mod cosmology;
 pub mod dark_energy;
+pub mod distances;
 pub mod redshift;
 pub mod units;
 
+pub use cosmology::FLRWCosmology;
+
 // Common units are re-exported from the crate root for convenience.
 pub use redshift::Redshift;
-pub use units::{
-    eV, DimensionlessPositiveFloat, HInvKmPerSecPerMpc, KmPerSecPerMpc, TemperatureKelvin,
-};
+pub use units::{eV, DimensionlessPositiveFloat, HInvKmPerSecPerMpc, Kelvin, KmPerSecPerMpc, Mpc};

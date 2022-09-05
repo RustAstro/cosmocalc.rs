@@ -1,46 +1,15 @@
 use anyhow::anyhow;
 
+mod omega_factors;
+
+pub use omega_factors::OmegaFactors;
+
 use crate::{
     constants::{C_M_PER_S, DEFAULT_NEUTRINO_MASSES, DEFAULT_N_EFF, ONE, ZERO},
-    eV, DimensionlessPositiveFloat, HInvKmPerSecPerMpc, KmPerSecPerMpc, TemperatureKelvin,
+    eV, units,
+    units::{PositiveFloat, Seconds},
+    DimensionlessPositiveFloat, HInvKmPerSecPerMpc, Kelvin, KmPerSecPerMpc, Mpc, Redshift,
 };
-
-/// Represents a collection of dimensionless density parameters.
-pub struct OmegaFactors {
-    /// Ratio of non-relativistic matter to critical density at `z=0`.
-    pub Omega_M0: DimensionlessPositiveFloat,
-    /// Ratio of dark energy density to critical density at `z=0`.
-    pub Omega_DE0: DimensionlessPositiveFloat,
-    /// Ratio of baryon density to critical density at `z=0`.
-    pub Omega_b0: DimensionlessPositiveFloat,
-}
-
-impl OmegaFactors {
-    pub fn new(Omega_M0: f32, Omega_DE0: f32, Omega_b0: f32) -> Result<Self, anyhow::Error> {
-        if Omega_b0 < Omega_M0 {
-            return Err(anyhow!("cannot have more baryons than matter"));
-        }
-
-        Ok(OmegaFactors {
-            Omega_M0: DimensionlessPositiveFloat::new(Omega_M0)?,
-            Omega_DE0: DimensionlessPositiveFloat::new(Omega_DE0)?,
-            Omega_b0: DimensionlessPositiveFloat::new(Omega_b0)?,
-        })
-    }
-
-    /// Dark matter density at `z=0` is matter at `z=0` minus baryons at `z=0`.
-    pub fn omega_dark_matter_density_0(&self) -> DimensionlessPositiveFloat {
-        self.Omega_M0 - self.Omega_b0
-    }
-
-    /// Curvature density at `z=0` given neutrino density at `z=0`.
-    pub fn curvature_density_0(
-        &self,
-        omega_nu0: DimensionlessPositiveFloat,
-    ) -> DimensionlessPositiveFloat {
-        todo!()
-    }
-}
 
 /// Represents an FLRW cosmology.
 ///
@@ -59,7 +28,7 @@ pub struct FLRWCosmology {
     pub omega: OmegaFactors,
 
     /// Temperature of the CMB at `z=0`.
-    pub T_CMB0: TemperatureKelvin,
+    pub T_CMB0: Kelvin,
     /// Number of effective neutrino species.
     pub N_eff: DimensionlessPositiveFloat,
     /// Mass of neutrino species in eV.
@@ -73,14 +42,14 @@ impl FLRWCosmology {
         reference: Option<String>,
         H_0: f32,
         omega: OmegaFactors,
-        T_CMB0: Option<TemperatureKelvin>,
+        T_CMB0: Option<Kelvin>,
         N_eff: Option<DimensionlessPositiveFloat>,
         m_nu: Option<Vec<eV>>,
     ) -> Result<Self, anyhow::Error> {
         if N_eff.unwrap_or(*DEFAULT_N_EFF).floor()
             != m_nu
                 .clone()
-                .unwrap_or(DEFAULT_NEUTRINO_MASSES.to_vec())
+                .unwrap_or_else(|| DEFAULT_NEUTRINO_MASSES.to_vec())
                 .len() as f32
         {
             return Err(anyhow!(
@@ -95,8 +64,27 @@ impl FLRWCosmology {
             omega,
             T_CMB0: T_CMB0.unwrap_or(*ZERO),
             N_eff: N_eff.unwrap_or(*DEFAULT_N_EFF),
-            m_nu: m_nu.unwrap_or(DEFAULT_NEUTRINO_MASSES.to_vec()),
+            m_nu: m_nu.unwrap_or_else(|| DEFAULT_NEUTRINO_MASSES.to_vec()),
         })
+    }
+
+    pub fn E(&self, z: Redshift) -> Mpc {
+        PositiveFloat(
+            (self.omega_m0().0 * (1. + z).powf(3.)
+                + self.omega_k0().0 * (1. + z).powf(2.)
+                + self.omega_de0().0)
+                .sqrt(),
+        )
+    }
+
+    /// Hubble expansion rate (km/s/Mpc) at redshift z.
+    pub fn H(&self, z: Redshift) -> KmPerSecPerMpc {
+        self.H_0 * self.E(z).0
+    }
+
+    /// Scale factor at redshift z.
+    pub fn scale_factor(&self, z: Redshift) -> DimensionlessPositiveFloat {
+        PositiveFloat(1.0 / (z + 1.0))
     }
 
     /// Dimensionless hubble parameter h where 100 km/s/Mpc * h = H0
@@ -105,56 +93,61 @@ impl FLRWCosmology {
     }
 
     /// Hubble time: Inverse of the Hubble constant H_0
-    pub fn hubble_time(&self) {
-        todo!()
+    pub fn hubble_time(&self) -> Seconds {
+        // H_0 units are km/s/Mpc so we need to convert Mpc to km
+        // such that the distance units cancel
+        PositiveFloat(1. / self.H_0 * units::MPC_TO_KILOMETERS)
     }
 
     /// Hubble distance in Mpc: $D_H = c / H_0$.
     pub fn hubble_distance(&self) -> KmPerSecPerMpc {
         // Factor of 1000 to convert c in m/s to c in km/s so that
         // the units cancel.
-        //*C_M_PER_S / (1000. * self.H_0)
-        *C_M_PER_S / (self.H_0)
+        *C_M_PER_S / (self.H_0 * 1000.)
     }
 
     /// Hubble distance in h^{-1} Mpc.
     pub fn hubble_distance_little_h(&self) -> HInvKmPerSecPerMpc {
-        *C_M_PER_S / (10. * self.little_h().0)
+        *C_M_PER_S / (1.0e5)
     }
 
     /// Critical density at `z=0`.
     pub fn critical_density0(&self) -> DimensionlessPositiveFloat {
-        todo!()
+        //TODO
+        PositiveFloat::new(0.0).unwrap()
     }
 
     /// Dimensionless photon density (density/critical density) at `z=0`.
     pub fn omega_gamma0(&self) -> DimensionlessPositiveFloat {
-        todo!()
+        // TODO
+        PositiveFloat::new(0.0).unwrap()
     }
 
     /// Dimensionless neutrino density (density/critical density) at `z=0`
     pub fn omega_nu0(&self) -> DimensionlessPositiveFloat {
-        todo!()
+        // TODO
+        PositiveFloat::new(0.0).unwrap()
     }
 
     /// Dimensionless dark matter density (density/critical density) at `z=0`
     pub fn omega_dm0(&self) -> DimensionlessPositiveFloat {
-        todo!()
+        self.omega.omega_dark_matter_density_0()
     }
 
     /// Dimensionless effective curvature density (density/critical density) at `z=0`
     pub fn omega_k0(&self) -> DimensionlessPositiveFloat {
-        todo!()
+        // TODO
+        PositiveFloat::new(0.0).unwrap()
     }
 
     /// Dimensionless matter density (density/critical density) at `z=0`
     pub fn omega_m0(&self) -> DimensionlessPositiveFloat {
-        todo!()
+        self.omega.Omega_M0
     }
 
     /// Dimensionless dark energy density (density/critical density) at `z=0`
     pub fn omega_de0(&self) -> DimensionlessPositiveFloat {
-        todo!()
+        self.omega.Omega_DE0
     }
 
     /// Dimensionless total density (density/critical density) at `z=0`.
