@@ -11,7 +11,7 @@ pub struct OmegaFactors {
 }
 
 impl OmegaFactors {
-    pub fn new(Omega_M0: f32, Omega_DE0: f32, Omega_b0: f32) -> Result<Self, anyhow::Error> {
+    pub fn new(Omega_M0: f64, Omega_DE0: f64, Omega_b0: f64) -> Result<Self, anyhow::Error> {
         if Omega_b0 > Omega_M0 {
             return Err(anyhow::anyhow!("cannot have more baryons than matter"));
         }

@@ -40,7 +40,7 @@ impl FLRWCosmology {
     pub fn new(
         name: Option<String>,
         reference: Option<String>,
-        H_0: f32,
+        H_0: f64,
         omega: OmegaFactors,
         T_CMB0: Option<Kelvin>,
         N_eff: Option<DimensionlessPositiveFloat>,
@@ -50,7 +50,7 @@ impl FLRWCosmology {
             != m_nu
                 .clone()
                 .unwrap_or_else(|| DEFAULT_NEUTRINO_MASSES.to_vec())
-                .len() as f32
+                .len() as f64
         {
             return Err(anyhow!(
                 "number of neutrino masses must match the number of effective neutrino species"
@@ -103,18 +103,20 @@ impl FLRWCosmology {
     pub fn hubble_distance(&self) -> KmPerSecPerMpc {
         // Factor of 1000 to convert c in m/s to c in km/s so that
         // the units cancel.
-        *C_M_PER_S / (self.H_0 * units::KILOMETER_TO_METER)
+        C_M_PER_S / (self.H_0 * units::KILOMETER_TO_METER)
     }
 
     /// Hubble distance in h^{-1} Mpc.
     pub fn hubble_distance_little_h(&self) -> HInvKmPerSecPerMpc {
-        *C_M_PER_S / (1.0e5)
+        C_M_PER_S / (1.0e5)
     }
 
-    /// Critical density at `z=0`.
-    pub fn critical_density0(&self) -> DimensionlessPositiveFloat {
-        //TODO
-        PositiveFloat::new(0.0).unwrap()
+    /// Critical mass density at redshift z.
+    pub fn critical_density(&self, z: Redshift) -> units::KilogramsPerMeter3 {
+        PositiveFloat(
+            3. * self.H(z).powf(2.)
+                / (8. * constants::PI * constants::G * units::MPC_TO_KILOMETERS.powf(2.)),
+        )
     }
 
     /// Dimensionless photon density (density/critical density) at `z=0`.

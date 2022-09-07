@@ -1,1 +1,1 @@
-pub type Redshift = f32;
+pub type Redshift = f64;

@@ -1,7 +1,7 @@
 use crate::{units::PositiveFloat, FLRWCosmology, Mpc, Redshift};
 
 /// Bin width in redshift integrals.
-const DZ: f32 = 0.0001;
+const DZ: f64 = 0.0001;
 
 /// Cosmological distances following Hogg 2000
 /// https://arxiv.org/pdf/astro-ph/9905116.pdf
@@ -18,7 +18,7 @@ pub trait Distances {
 
 impl Distances for FLRWCosmology {
     fn radial_comoving_distance(&self, z: Redshift) -> Mpc {
-        let mut integrand: f32 = 0.0;
+        let mut integrand: f64 = 0.0;
         let mut z_prime = 0.0;
         while z_prime < z {
             z_prime += DZ / 2.;
@@ -53,6 +53,7 @@ mod tests {
 
         // Megaparsecs
         // Ned Wright calculator yields 6481.1
-        assert_eq!(cosmology.radial_comoving_distance(3.0).0, 6482.5117);
+        assert!(cosmology.radial_comoving_distance(3.0).0 > 6482.5);
+        assert!(cosmology.radial_comoving_distance(3.0).0 < 6483.0);
     }
 }

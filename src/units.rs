@@ -15,25 +15,33 @@ pub type eV = PositiveFloat;
 pub type Kelvin = PositiveFloat;
 
 // Hubble parameter units
-pub type KmPerSecPerMpc = f32;
-pub type HInvKmPerSecPerMpc = f32;
+pub type KmPerSecPerMpc = f64;
+pub type HInvKmPerSecPerMpc = f64;
 
 // Distances
 pub type Meter = PositiveFloat;
 pub type Km = PositiveFloat;
 pub type Mpc = PositiveFloat;
 
+// Densities
+pub type KilogramsPerMeter3 = PositiveFloat;
+
+// Constant units
+// TODO: Work out a better way to handle types for composite unit information
+pub type MetersPerSecond = f64;
+pub type Meters3PerKgPerSecond2 = f64;
+
 // Conversions
-pub const KILOMETER_TO_METER: f32 = 1000.;
-pub const MPC_TO_METERS: f32 = 3.086e+22;
-pub const MPC_TO_KILOMETERS: f32 = 3.086e+19;
+pub const KILOMETER_TO_METER: f64 = 1000.;
+pub const MPC_TO_METERS: f64 = 3.086e+22;
+pub const MPC_TO_KILOMETERS: f64 = 3.086e+19;
 
 /// Represents continuous physical quantities that _cannot_ be negative.
 #[derive(Clone, Copy, Debug, PartialOrd, PartialEq)]
-pub struct PositiveFloat(pub f32);
+pub struct PositiveFloat(pub f64);
 
 impl PositiveFloat {
-    pub fn new(x: f32) -> Result<Self, anyhow::Error> {
+    pub fn new(x: f64) -> Result<Self, anyhow::Error> {
         if x < 0. {
             return Err(anyhow!("expected positive number"));
         }
@@ -41,11 +49,11 @@ impl PositiveFloat {
     }
 
     // Passthrough methods for convenience
-    pub fn floor(&self) -> f32 {
+    pub fn floor(&self) -> f64 {
         self.0.floor()
     }
 
-    pub fn powf(&self, exp: f32) -> f32 {
+    pub fn powf(&self, exp: f64) -> f64 {
         self.0.powf(exp)
     }
 }
