@@ -24,6 +24,7 @@ pub type Km = PositiveFloat;
 pub type Mpc = PositiveFloat;
 
 // Conversions
+pub const KILOMETER_TO_METER: f32 = 1000.;
 pub const MPC_TO_METERS: f32 = 3.086e+22;
 pub const MPC_TO_KILOMETERS: f32 = 3.086e+19;
 

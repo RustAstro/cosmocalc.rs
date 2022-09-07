@@ -5,7 +5,7 @@ mod omega_factors;
 pub use omega_factors::OmegaFactors;
 
 use crate::{
-    constants::{C_M_PER_S, DEFAULT_NEUTRINO_MASSES, DEFAULT_N_EFF, ONE, ZERO},
+    constants::{self, C_M_PER_S, DEFAULT_NEUTRINO_MASSES, DEFAULT_N_EFF, ONE, ZERO},
     eV, units,
     units::{PositiveFloat, Seconds},
     DimensionlessPositiveFloat, HInvKmPerSecPerMpc, Kelvin, KmPerSecPerMpc, Mpc, Redshift,
@@ -103,7 +103,7 @@ impl FLRWCosmology {
     pub fn hubble_distance(&self) -> KmPerSecPerMpc {
         // Factor of 1000 to convert c in m/s to c in km/s so that
         // the units cancel.
-        *C_M_PER_S / (self.H_0 * 1000.)
+        *C_M_PER_S / (self.H_0 * units::KILOMETER_TO_METER)
     }
 
     /// Hubble distance in h^{-1} Mpc.
@@ -136,8 +136,8 @@ impl FLRWCosmology {
 
     /// Dimensionless effective curvature density (density/critical density) at `z=0`
     pub fn omega_k0(&self) -> DimensionlessPositiveFloat {
-        // TODO
-        PositiveFloat::new(0.0).unwrap()
+        self.omega
+            .curvature_density_0(self.omega_nu0(), self.omega_gamma0())
     }
 
     /// Dimensionless matter density (density/critical density) at `z=0`
@@ -164,7 +164,8 @@ impl FLRWCosmology {
         self.omega_k0() == *ZERO && self.omega_tot0() == *ONE
     }
 
-    pub fn neutrino_temperature(&self) {
-        todo!()
+    /// Neutrino temperature at `z=0`.
+    pub fn neutrino_temperature0(&self) -> Kelvin {
+        PositiveFloat(self.T_CMB0.0 * (*constants::T_NU_TO_T_GAMMA_RATIO).0)
     }
 }

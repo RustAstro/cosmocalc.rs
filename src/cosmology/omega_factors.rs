@@ -1,4 +1,4 @@
-use crate::DimensionlessPositiveFloat;
+use crate::{units::PositiveFloat, DimensionlessPositiveFloat};
 
 /// Represents a collection of dimensionless density parameters.
 pub struct OmegaFactors {
@@ -28,11 +28,12 @@ impl OmegaFactors {
         self.Omega_M0 - self.Omega_b0
     }
 
-    /// Curvature density at `z=0` given neutrino density at `z=0`.
+    /// Curvature density at `z=0` given densities of relativistic particles at `z=0`.
     pub fn curvature_density_0(
         &self,
-        _omega_nu0: DimensionlessPositiveFloat,
+        omega_nu0: DimensionlessPositiveFloat,
+        omega_gamma0: DimensionlessPositiveFloat,
     ) -> DimensionlessPositiveFloat {
-        todo!()
+        PositiveFloat(1.0) - self.Omega_M0 - self.Omega_DE0 - omega_nu0 - omega_gamma0
     }
 }

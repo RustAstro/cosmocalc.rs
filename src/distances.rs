@@ -6,8 +6,10 @@ const DZ: f32 = 0.0001;
 /// Cosmological distances following Hogg 2000
 /// https://arxiv.org/pdf/astro-ph/9905116.pdf
 pub trait Distances {
-    /// Line of sight comoving distance in Megaparsecs.
-    fn comoving_distance(&self, z: Redshift) -> Mpc;
+    /// Line of sight (radial) comoving distance in Megaparsecs.
+    fn radial_comoving_distance(&self, z: Redshift) -> Mpc;
+    /// Transverse comoving distance in Megaparsecs.
+    fn transverse_comoving_distance(&self, z: Redshift) -> Mpc;
     /// Angular diameter distance in Megaparsecs.
     fn angular_diameter_distance(&self, z: Redshift) -> Mpc;
     /// Luminosity distance in Megaparsecs.
@@ -15,7 +17,7 @@ pub trait Distances {
 }
 
 impl Distances for FLRWCosmology {
-    fn comoving_distance(&self, z: Redshift) -> Mpc {
+    fn radial_comoving_distance(&self, z: Redshift) -> Mpc {
         let mut integrand: f32 = 0.0;
         let mut z_prime = 0.0;
         while z_prime < z {
@@ -23,6 +25,10 @@ impl Distances for FLRWCosmology {
             integrand += (DZ / 2.) / self.E(z_prime).0;
         }
         PositiveFloat(self.hubble_distance() * integrand)
+    }
+
+    fn transverse_comoving_distance(&self, _z: Redshift) -> Mpc {
+        todo!()
     }
 
     fn angular_diameter_distance(&self, _z: Redshift) -> Mpc {
@@ -47,6 +53,6 @@ mod tests {
 
         // Megaparsecs
         // Ned Wright calculator yields 6481.1
-        assert_eq!(cosmology.comoving_distance(3.0).0, 6482.5117);
+        assert_eq!(cosmology.radial_comoving_distance(3.0).0, 6482.5117);
     }
 }
