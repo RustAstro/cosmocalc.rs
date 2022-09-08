@@ -5,16 +5,27 @@ mod omega_factors;
 pub use omega_factors::OmegaFactors;
 
 use crate::{
-    constants::{self, C_M_PER_S, DEFAULT_NEUTRINO_MASSES, DEFAULT_N_EFF, ONE, ZERO},
+    constants::{self, C_M_PER_S, DEFAULT_NEUTRINO_MASSES, DEFAULT_N_EFF},
     eV, units,
     units::{PositiveFloat, Seconds},
-    DimensionlessPositiveFloat, HInvKmPerSecPerMpc, Kelvin, KmPerSecPerMpc, Mpc, Redshift,
+    DimensionlessFloat, DimensionlessPositiveFloat, HInvKmPerSecPerMpc, Kelvin, KmPerSecPerMpc,
+    Mpc, Redshift,
 };
 
 /// Represents an FLRW cosmology.
 ///
 /// This represents an homogenous and isotropic cosmology based
 /// on the FLRW (Friedmann-Lemaitre-Robertson-Walker) metric.
+///
+/// # Examples
+///
+/// ```
+/// use cosmocalc::{Distances, FLRWCosmology};
+///
+/// let cosmology = FLRWCosmology::two_component(0.286, 0.714, 69.6);
+/// assert!(cosmology.radial_comoving_distance(2.0).0 > 5273.);
+/// assert!(cosmology.radial_comoving_distance(2.0).0 < 5274.);
+/// ```
 pub struct FLRWCosmology {
     /// A descriptive name.
     pub name: Option<String>,
@@ -36,6 +47,20 @@ pub struct FLRWCosmology {
 }
 
 impl FLRWCosmology {
+    /// Instantiate a simple two component cosmology.
+    pub fn two_component(Omega_M0: f64, Omega_DE0: f64, H_0: f64) -> Self {
+        let omega = OmegaFactors::new(Omega_M0, Omega_DE0, Omega_M0).unwrap();
+        Self {
+            name: None,
+            reference: None,
+            H_0,
+            omega,
+            T_CMB0: Some(PositiveFloat::zero()),
+            N_eff: PositiveFloat::zero(),
+            m_nu: vec![],
+        }
+    }
+
     /// Instantiate a new FLRW cosmology.
     pub fn new(
         name: Option<String>,
@@ -130,89 +155,89 @@ impl FLRWCosmology {
     /// Dimensionless photon density (density/critical density) at `z=0`.
     ///
     /// Eqn. 2.28 from Ryden divided by the critical density at `z=0`
-    pub fn omega_gamma0(&self) -> DimensionlessPositiveFloat {
+    pub fn omega_gamma0(&self) -> DimensionlessFloat {
         match self.T_CMB0 {
-            Some(T_CMB0) => PositiveFloat(
+            Some(T_CMB0) => DimensionlessFloat(
                 *constants::ALPHA * T_CMB0.powf(4.)
                     / (self.critical_density(0.).0 * C_M_PER_S.powf(2.)),
             ),
-            None => *ZERO,
+            None => DimensionlessFloat::zero(),
         }
     }
 
     /// Dimensionless photon density (density/critical density) at `z>0`
-    pub fn omega_gamma(&self, z: Redshift) -> DimensionlessPositiveFloat {
-        PositiveFloat(self.omega_gamma0().0 * (1.0 + z).powf(4.) * 1. / self.E(z).0.powf(2.))
+    pub fn omega_gamma(&self, z: Redshift) -> DimensionlessFloat {
+        DimensionlessFloat(self.omega_gamma0().0 * (1.0 + z).powf(4.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless neutrino density (density/critical density) at `z=0`
-    pub fn omega_nu0(&self) -> DimensionlessPositiveFloat {
+    pub fn omega_nu0(&self) -> DimensionlessFloat {
         match self.T_CMB0 {
-            Some(_) => PositiveFloat(
+            Some(_) => DimensionlessFloat(
                 7. / 8. * (4.0f64 / 11.).powf(4. / 3.) * self.N_eff.0 * self.omega_gamma0().0,
             ),
-            None => *ZERO,
+            None => DimensionlessFloat::zero(),
         }
     }
 
     /// Dimensionless neutrino density (density/critical density) at `z>0`
-    pub fn omega_nu(&self, z: Redshift) -> DimensionlessPositiveFloat {
-        PositiveFloat(self.omega_nu0().0 * (1.0 + z).powf(4.) * 1. / self.E(z).0.powf(2.))
+    pub fn omega_nu(&self, z: Redshift) -> DimensionlessFloat {
+        DimensionlessFloat(self.omega_nu0().0 * (1.0 + z).powf(4.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless dark matter density (density/critical density) at `z=0`
-    pub fn omega_dm0(&self) -> DimensionlessPositiveFloat {
+    pub fn omega_dm0(&self) -> DimensionlessFloat {
         self.omega.omega_dark_matter_density_0()
     }
 
     /// Dimensionless dark matter density (density/critical density) at `z>0`
-    pub fn omega_dm(&self, z: Redshift) -> DimensionlessPositiveFloat {
-        PositiveFloat(self.omega_dm0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
+    pub fn omega_dm(&self, z: Redshift) -> DimensionlessFloat {
+        DimensionlessFloat(self.omega_dm0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless effective curvature density (density/critical density) at `z=0`
-    pub fn omega_k0(&self) -> DimensionlessPositiveFloat {
+    pub fn omega_k0(&self) -> DimensionlessFloat {
         self.omega
             .curvature_density_0(self.omega_nu0(), self.omega_gamma0())
     }
 
     /// Dimensionless effective curvature density (density/critical density) at `z>0`
-    pub fn omega_k(&self, z: Redshift) -> DimensionlessPositiveFloat {
-        PositiveFloat(self.omega_k0().0 * (1.0 + z).powf(2.) * 1. / self.E(z).0.powf(2.))
+    pub fn omega_k(&self, z: Redshift) -> DimensionlessFloat {
+        DimensionlessFloat(self.omega_k0().0 * (1.0 + z).powf(2.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless matter density (density/critical density) at `z=0`
-    pub fn omega_m0(&self) -> DimensionlessPositiveFloat {
+    pub fn omega_m0(&self) -> DimensionlessFloat {
         self.omega.Omega_M0
     }
 
     /// Dimensionless matter density (density/critical density) at `z>0`
-    pub fn omega_m(&self, z: Redshift) -> DimensionlessPositiveFloat {
-        PositiveFloat(self.omega_m0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
+    pub fn omega_m(&self, z: Redshift) -> DimensionlessFloat {
+        DimensionlessFloat(self.omega_m0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless baryon density (density/critical density) at `z=0`
-    pub fn omega_b0(&self) -> DimensionlessPositiveFloat {
+    pub fn omega_b0(&self) -> DimensionlessFloat {
         self.omega.Omega_b0
     }
 
     /// Dimensionless baryon density (density/critical density) at `z>0`
-    pub fn omega_b(&self, z: Redshift) -> DimensionlessPositiveFloat {
-        PositiveFloat(self.omega_b0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
+    pub fn omega_b(&self, z: Redshift) -> DimensionlessFloat {
+        DimensionlessFloat(self.omega_b0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless dark energy density (density/critical density) at `z=0`
-    pub fn omega_de0(&self) -> DimensionlessPositiveFloat {
+    pub fn omega_de0(&self) -> DimensionlessFloat {
         self.omega.Omega_DE0
     }
 
     /// Dimensionless dark energy density (density/critical density) at `z>0`.
-    pub fn omega_de(&self, z: Redshift) -> DimensionlessPositiveFloat {
-        PositiveFloat(self.omega_de0().0 / self.E(z).0.powf(2.))
+    pub fn omega_de(&self, z: Redshift) -> DimensionlessFloat {
+        DimensionlessFloat(self.omega_de0().0 / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless total density (density/critical density) at `z=0`.
-    pub fn omega_tot0(&self) -> DimensionlessPositiveFloat {
+    pub fn omega_tot0(&self) -> DimensionlessFloat {
         self.omega_m0()
             + self.omega_gamma0()
             + self.omega_nu0()
@@ -221,7 +246,7 @@ impl FLRWCosmology {
     }
 
     /// Dimensionless total density (density/critical density) at `z>0`.
-    pub fn omega_tot(&self, z: Redshift) -> DimensionlessPositiveFloat {
+    pub fn omega_tot(&self, z: Redshift) -> DimensionlessFloat {
         self.omega_m(z)
             + self.omega_gamma(z)
             + self.omega_nu(z)
@@ -231,14 +256,15 @@ impl FLRWCosmology {
 
     /// Whether this cosmology is spatially flat
     pub fn is_flat(&self) -> bool {
-        self.omega_k0() == *ZERO && self.omega_tot0() == *ONE
+        self.omega_k0() == DimensionlessFloat::zero()
+            && self.omega_tot0() == DimensionlessFloat::one()
     }
 
     /// Neutrino temperature at `z=0`.
     pub fn neutrino_temperature0(&self) -> Kelvin {
         match self.T_CMB0 {
             Some(T_cmb) => PositiveFloat(T_cmb.0 * (*constants::T_NU_TO_T_GAMMA_RATIO).0),
-            None => *ZERO,
+            None => DimensionlessPositiveFloat::zero(),
         }
     }
 }

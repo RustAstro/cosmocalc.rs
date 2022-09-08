@@ -1,12 +1,24 @@
 # cosmocalc.rs
 
+[![Crates.io][crates-badge]][crates-url]
+[![Documentation][docs-badge]][docs-url]
+
+[crates-badge]: https://img.shields.io/crates/v/cosmocalc.svg
+[crates-url]: https://crates.io/crates/cosmocalc
+[docs-badge]: https://docs.rs/cosmocalc/badge.svg
+[docs-url]: https://docs.rs/cosmocalc
+
 A library for computing quantities in cosmology in the Rust programming language
 
 # Features
 
 ## Cosmological distance calculations
 
-TODO
+```rust
+let cosmology = FLRWCosmology::two_component(0.286, 0.714, 69.6);
+assert!(cosmology.radial_comoving_distance(2.0).0 > 5273.);
+assert!(cosmology.radial_comoving_distance(2.0).0 < 5274.); 
+```
 
 # Developers
 

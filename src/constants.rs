@@ -11,13 +11,14 @@ use crate::{
 
 pub const PI: f64 = std::f64::consts::PI;
 
-pub static ZERO: Lazy<DimensionlessPositiveFloat> =
-    Lazy::new(|| DimensionlessPositiveFloat::new(0.0).unwrap());
-pub static ONE: Lazy<DimensionlessPositiveFloat> =
-    Lazy::new(|| DimensionlessPositiveFloat::new(1.0).unwrap());
-
 // Neutrinos
-pub static DEFAULT_NEUTRINO_MASSES: Lazy<[eV; 3]> = Lazy::new(|| [*ZERO, *ZERO, *ZERO]);
+pub static DEFAULT_NEUTRINO_MASSES: Lazy<[eV; 3]> = Lazy::new(|| {
+    [
+        DimensionlessPositiveFloat::zero(),
+        DimensionlessPositiveFloat::zero(),
+        DimensionlessPositiveFloat::zero(),
+    ]
+});
 pub static DEFAULT_N_EFF: Lazy<DimensionlessPositiveFloat> =
     Lazy::new(|| DimensionlessPositiveFloat::new(3.04).unwrap()); // WMAP (ApJ Spergel et al 2007)
 

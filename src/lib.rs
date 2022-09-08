@@ -8,10 +8,11 @@ pub mod units;
 pub mod utils;
 
 pub use cosmology::FLRWCosmology;
+pub use distances::Distances;
 
 // Common units are re-exported from the crate root for convenience.
 pub use redshift::Redshift;
 pub use units::{
-    eV, DimensionlessPositiveFloat, HInvKmPerSecPerMpc, Joule, Kelvin, Kilogram, KmPerSecPerMpc,
-    Mpc,
+    eV, DimensionlessFloat, DimensionlessPositiveFloat, HInvKmPerSecPerMpc, Joule, Kelvin,
+    Kilogram, KmPerSecPerMpc, Mpc,
 };
