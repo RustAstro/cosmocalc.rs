@@ -28,7 +28,7 @@ pub struct FLRWCosmology {
     pub omega: OmegaFactors,
 
     /// Temperature of the CMB at `z=0`.
-    pub T_CMB0: Kelvin,
+    pub T_CMB0: Option<Kelvin>,
     /// Number of effective neutrino species.
     pub N_eff: DimensionlessPositiveFloat,
     /// Mass of neutrino species in eV.
@@ -42,7 +42,7 @@ impl FLRWCosmology {
         reference: Option<String>,
         H_0: f64,
         omega: OmegaFactors,
-        T_CMB0: Option<Kelvin>,
+        T_CMB0: Option<f64>,
         N_eff: Option<DimensionlessPositiveFloat>,
         m_nu: Option<Vec<eV>>,
     ) -> Result<Self, anyhow::Error> {
@@ -62,7 +62,7 @@ impl FLRWCosmology {
             reference,
             H_0,
             omega,
-            T_CMB0: T_CMB0.unwrap_or(*ZERO),
+            T_CMB0: T_CMB0.map(PositiveFloat),
             N_eff: N_eff.unwrap_or(*DEFAULT_N_EFF),
             m_nu: m_nu.unwrap_or_else(|| DEFAULT_NEUTRINO_MASSES.to_vec()),
         })
@@ -72,8 +72,9 @@ impl FLRWCosmology {
         PositiveFloat(
             (self.omega_m0().0 * (1. + z).powf(3.)
                 + self.omega_k0().0 * (1. + z).powf(2.)
-                + self.omega_de0().0)
-                .sqrt(),
+                + self.omega_de0().0
+                + (self.omega_gamma0().0 + self.omega_nu0().0) * (1. + z).powf(4.))
+            .sqrt(),
         )
     }
 
@@ -113,27 +114,60 @@ impl FLRWCosmology {
 
     /// Critical mass density at redshift z.
     pub fn critical_density(&self, z: Redshift) -> units::KilogramsPerMeter3 {
-        PositiveFloat(
-            3. * self.H(z).powf(2.)
-                / (8. * constants::PI * constants::G * units::MPC_TO_KILOMETERS.powf(2.)),
-        )
+        if z == 0.0 {
+            PositiveFloat(
+                3. * self.H_0.powf(2.)
+                    / (8. * constants::PI * constants::G * units::MPC_TO_KILOMETERS.powf(2.)),
+            )
+        } else {
+            PositiveFloat(
+                3. * self.H(z).powf(2.)
+                    / (8. * constants::PI * constants::G * units::MPC_TO_KILOMETERS.powf(2.)),
+            )
+        }
     }
 
     /// Dimensionless photon density (density/critical density) at `z=0`.
+    ///
+    /// Eqn. 2.28 from Ryden divided by the critical density at `z=0`
     pub fn omega_gamma0(&self) -> DimensionlessPositiveFloat {
-        // TODO
-        PositiveFloat::new(0.0).unwrap()
+        match self.T_CMB0 {
+            Some(T_CMB0) => PositiveFloat(
+                *constants::ALPHA * T_CMB0.powf(4.)
+                    / (self.critical_density(0.).0 * C_M_PER_S.powf(2.)),
+            ),
+            None => *ZERO,
+        }
+    }
+
+    /// Dimensionless photon density (density/critical density) at `z>0`
+    pub fn omega_gamma(&self, z: Redshift) -> DimensionlessPositiveFloat {
+        PositiveFloat(self.omega_gamma0().0 * (1.0 + z).powf(4.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless neutrino density (density/critical density) at `z=0`
     pub fn omega_nu0(&self) -> DimensionlessPositiveFloat {
-        // TODO
-        PositiveFloat::new(0.0).unwrap()
+        match self.T_CMB0 {
+            Some(_) => PositiveFloat(
+                7. / 8. * (4.0f64 / 11.).powf(4. / 3.) * self.N_eff.0 * self.omega_gamma0().0,
+            ),
+            None => *ZERO,
+        }
+    }
+
+    /// Dimensionless neutrino density (density/critical density) at `z>0`
+    pub fn omega_nu(&self, z: Redshift) -> DimensionlessPositiveFloat {
+        PositiveFloat(self.omega_nu0().0 * (1.0 + z).powf(4.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless dark matter density (density/critical density) at `z=0`
     pub fn omega_dm0(&self) -> DimensionlessPositiveFloat {
         self.omega.omega_dark_matter_density_0()
+    }
+
+    /// Dimensionless dark matter density (density/critical density) at `z>0`
+    pub fn omega_dm(&self, z: Redshift) -> DimensionlessPositiveFloat {
+        PositiveFloat(self.omega_dm0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless effective curvature density (density/critical density) at `z=0`
@@ -142,14 +176,39 @@ impl FLRWCosmology {
             .curvature_density_0(self.omega_nu0(), self.omega_gamma0())
     }
 
+    /// Dimensionless effective curvature density (density/critical density) at `z>0`
+    pub fn omega_k(&self, z: Redshift) -> DimensionlessPositiveFloat {
+        PositiveFloat(self.omega_k0().0 * (1.0 + z).powf(2.) * 1. / self.E(z).0.powf(2.))
+    }
+
     /// Dimensionless matter density (density/critical density) at `z=0`
     pub fn omega_m0(&self) -> DimensionlessPositiveFloat {
         self.omega.Omega_M0
     }
 
+    /// Dimensionless matter density (density/critical density) at `z>0`
+    pub fn omega_m(&self, z: Redshift) -> DimensionlessPositiveFloat {
+        PositiveFloat(self.omega_m0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
+    }
+
+    /// Dimensionless baryon density (density/critical density) at `z=0`
+    pub fn omega_b0(&self) -> DimensionlessPositiveFloat {
+        self.omega.Omega_b0
+    }
+
+    /// Dimensionless baryon density (density/critical density) at `z>0`
+    pub fn omega_b(&self, z: Redshift) -> DimensionlessPositiveFloat {
+        PositiveFloat(self.omega_b0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
+    }
+
     /// Dimensionless dark energy density (density/critical density) at `z=0`
     pub fn omega_de0(&self) -> DimensionlessPositiveFloat {
         self.omega.Omega_DE0
+    }
+
+    /// Dimensionless dark energy density (density/critical density) at `z>0`.
+    pub fn omega_de(&self, z: Redshift) -> DimensionlessPositiveFloat {
+        PositiveFloat(self.omega_de0().0 / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless total density (density/critical density) at `z=0`.
@@ -161,6 +220,15 @@ impl FLRWCosmology {
             + self.omega_k0()
     }
 
+    /// Dimensionless total density (density/critical density) at `z>0`.
+    pub fn omega_tot(&self, z: Redshift) -> DimensionlessPositiveFloat {
+        self.omega_m(z)
+            + self.omega_gamma(z)
+            + self.omega_nu(z)
+            + self.omega_de(z)
+            + self.omega_k(z)
+    }
+
     /// Whether this cosmology is spatially flat
     pub fn is_flat(&self) -> bool {
         self.omega_k0() == *ZERO && self.omega_tot0() == *ONE
@@ -168,6 +236,9 @@ impl FLRWCosmology {
 
     /// Neutrino temperature at `z=0`.
     pub fn neutrino_temperature0(&self) -> Kelvin {
-        PositiveFloat(self.T_CMB0.0 * (*constants::T_NU_TO_T_GAMMA_RATIO).0)
+        match self.T_CMB0 {
+            Some(T_cmb) => PositiveFloat(T_cmb.0 * (*constants::T_NU_TO_T_GAMMA_RATIO).0),
+            None => *ZERO,
+        }
     }
 }

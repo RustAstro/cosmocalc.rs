@@ -10,6 +10,11 @@ pub type Seconds = PositiveFloat;
 // Energy
 #[allow(non_camel_case_types)]
 pub type eV = PositiveFloat;
+pub type Joule = PositiveFloat;
+
+// Mass
+pub type Kilogram = PositiveFloat;
+pub type Gram = PositiveFloat;
 
 // Temperatures
 pub type Kelvin = PositiveFloat;
@@ -30,6 +35,11 @@ pub type KilogramsPerMeter3 = PositiveFloat;
 // TODO: Work out a better way to handle types for composite unit information
 pub type MetersPerSecond = f64;
 pub type Meters3PerKgPerSecond2 = f64;
+pub type Meters2KgPerSecond2Kelvin = f64;
+pub type JouleSeconds = f64;
+pub type JoulePerMeter3Kelvin4 = f64;
+pub type WattsPerMeters2Kelvin4 = f64;
+pub type JoulePerKelvin = f64;
 
 // Conversions
 pub const KILOMETER_TO_METER: f64 = 1000.;

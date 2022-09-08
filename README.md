@@ -18,8 +18,3 @@ This project requires [`Rust`](https://www.rust-lang.org/tools/install). Once in
 cargo build
 cargo test
 ```
-
-## Guidelines
-
-* Newtypes should be used for all units to provide compile-time checking of 
-dimensions.

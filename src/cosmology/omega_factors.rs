@@ -34,6 +34,9 @@ impl OmegaFactors {
         omega_nu0: DimensionlessPositiveFloat,
         omega_gamma0: DimensionlessPositiveFloat,
     ) -> DimensionlessPositiveFloat {
+        if self.Omega_M0 + self.Omega_DE0 + omega_nu0 + omega_gamma0 > PositiveFloat(1.0) {
+            unimplemented!();
+        }
         PositiveFloat(1.0) - self.Omega_M0 - self.Omega_DE0 - omega_nu0 - omega_gamma0
     }
 }

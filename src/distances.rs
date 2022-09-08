@@ -31,23 +31,24 @@ impl Distances for FLRWCosmology {
         todo!()
     }
 
-    fn angular_diameter_distance(&self, _z: Redshift) -> Mpc {
-        todo!()
+    fn angular_diameter_distance(&self, z: Redshift) -> Mpc {
+        PositiveFloat(self.transverse_comoving_distance(z).0 / (1. + z))
     }
 
-    fn luminosity_distance(&self, _z: Redshift) -> Mpc {
-        todo!()
+    fn luminosity_distance(&self, z: Redshift) -> Mpc {
+        // TODO: K-CORRECTIONS
+        PositiveFloat(self.transverse_comoving_distance(z).0 * (1. + z))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::cosmology::OmegaFactors;
+    use crate::{constants::ZERO, cosmology::OmegaFactors};
 
     use super::*;
 
     #[test]
-    fn flat_universe_distances() {
+    fn flat_universe_distances_no_relativistic_contribution() {
         let omegas = OmegaFactors::new(0.286, 0.714, 0.05).unwrap();
         let cosmology = FLRWCosmology::new(None, None, 69.6, omegas, None, None, None).unwrap();
 
@@ -55,5 +56,43 @@ mod tests {
         // Ned Wright calculator yields 6481.1
         assert!(cosmology.radial_comoving_distance(3.0).0 > 6482.5);
         assert!(cosmology.radial_comoving_distance(3.0).0 < 6483.0);
+    }
+
+    #[test]
+    fn flat_universe_distances_with_radiation_but_no_neutrinos() {
+        let omegas = OmegaFactors::new(0.25, 0.7, 0.05).unwrap();
+        let cosmology = FLRWCosmology::new(
+            None,
+            None,
+            69.6,
+            omegas,
+            Some(2.7255),
+            Some(PositiveFloat(0.)),
+            Some(vec![]),
+        )
+        .unwrap();
+
+        // Megaparsecs
+        assert!(cosmology.radial_comoving_distance(3.0).0 > 6598.5);
+        assert!(cosmology.radial_comoving_distance(3.0).0 < 6599.0);
+    }
+
+    #[test]
+    fn flat_universe_distances_with_radiation_and_neutrinos() {
+        let omegas = OmegaFactors::new(0.25, 0.7, 0.05).unwrap();
+        let cosmology = FLRWCosmology::new(
+            None,
+            None,
+            69.6,
+            omegas,
+            Some(2.7255),
+            Some(PositiveFloat(3.04)),
+            Some(vec![*ZERO, *ZERO, *ZERO]),
+        )
+        .unwrap();
+
+        // Megaparsecs
+        assert!(cosmology.radial_comoving_distance(3.0).0 > 6598.);
+        assert!(cosmology.radial_comoving_distance(3.0).0 < 6598.5);
     }
 }
