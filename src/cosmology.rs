@@ -7,7 +7,7 @@ pub use omega_factors::OmegaFactors;
 use crate::{
     constants::{self, C_M_PER_S, DEFAULT_NEUTRINO_MASSES, DEFAULT_N_EFF},
     eV, units,
-    units::{PositiveFloat, Seconds},
+    units::{FloatingPointUnit, PositiveFloat, Seconds},
     DimensionlessFloat, DimensionlessPositiveFloat, HInvKmPerSecPerMpc, Kelvin, KmPerSecPerMpc,
     Mpc, Redshift,
 };

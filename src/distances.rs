@@ -1,4 +1,7 @@
-use crate::{units::PositiveFloat, DimensionlessFloat, FLRWCosmology, Mpc, Redshift};
+use crate::{
+    units::{FloatingPointUnit, PositiveFloat},
+    DimensionlessFloat, FLRWCosmology, Mpc, Redshift,
+};
 
 /// Bin width in redshift integrals.
 const DZ: f64 = 0.0001;

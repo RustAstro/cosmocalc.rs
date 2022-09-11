@@ -1,5 +1,15 @@
 use anyhow::anyhow;
 
+mod dimensionless;
+mod energy;
+mod length;
+pub(crate) mod macros;
+mod time;
+mod traits;
+
+pub use dimensionless::DimensionlessFloat;
+pub use traits::FloatingPointUnit;
+
 // Continuous positive quantities that are dimensionless (e.g. ratios like the omegas)
 pub type DimensionlessPositiveFloat = PositiveFloat;
 
@@ -45,49 +55,6 @@ pub type JoulePerKelvin = f64;
 pub const KILOMETER_TO_METER: f64 = 1000.;
 pub const MPC_TO_METERS: f64 = 3.086e+22;
 pub const MPC_TO_KILOMETERS: f64 = 3.086e+19;
-
-/// Represents continuous dimensionless physical quantities.
-#[derive(Clone, Copy, Debug, PartialOrd, PartialEq)]
-pub struct DimensionlessFloat(pub f64);
-
-impl DimensionlessFloat {
-    pub fn new(x: f64) -> Result<Self, anyhow::Error> {
-        Ok(Self(x))
-    }
-
-    pub fn zero() -> Self {
-        Self(0.)
-    }
-
-    pub fn one() -> Self {
-        Self(1.)
-    }
-
-    // Passthrough methods for convenience
-    pub fn floor(&self) -> f64 {
-        self.0.floor()
-    }
-
-    pub fn powf(&self, exp: f64) -> f64 {
-        self.0.powf(exp)
-    }
-}
-
-impl std::ops::Sub for DimensionlessFloat {
-    type Output = DimensionlessFloat;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        DimensionlessFloat(self.0 - rhs.0)
-    }
-}
-
-impl std::ops::Add for DimensionlessFloat {
-    type Output = DimensionlessFloat;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        DimensionlessFloat(self.0 + rhs.0)
-    }
-}
 
 /// Represents continuous physical quantities that _cannot_ be negative.
 #[derive(Clone, Copy, Debug, PartialOrd, PartialEq)]
