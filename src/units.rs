@@ -5,6 +5,7 @@ pub mod energy;
 pub mod length;
 pub(crate) mod macros;
 pub mod mass;
+pub mod temperature;
 pub mod time;
 pub mod traits;
 
@@ -13,13 +14,6 @@ pub use traits::FloatingPointUnit;
 
 // Continuous positive quantities that are dimensionless (e.g. ratios like the omegas)
 pub type DimensionlessPositiveFloat = PositiveFloat;
-
-// Time
-pub type Gyr = PositiveFloat;
-pub type Seconds = PositiveFloat;
-
-// Temperatures
-pub type Kelvin = PositiveFloat;
 
 // Hubble parameter units
 pub type KmPerSecPerMpc = f64;
@@ -37,11 +31,6 @@ pub type JouleSeconds = f64;
 pub type JoulePerMeter3Kelvin4 = f64;
 pub type WattsPerMeters2Kelvin4 = f64;
 pub type JoulePerKelvin = f64;
-
-// Conversions
-pub const KILOMETER_TO_METER: f64 = 1000.;
-pub const MPC_TO_METERS: f64 = 3.086e+22;
-pub const MPC_TO_KILOMETERS: f64 = 3.086e+19;
 
 /// Represents continuous physical quantities that _cannot_ be negative.
 #[derive(Clone, Copy, Debug, PartialOrd, PartialEq)]

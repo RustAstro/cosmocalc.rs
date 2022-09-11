@@ -1,3 +1,7 @@
+/// This macro exists to implement the basic methods that should
+/// exist on unit/dimension structs that behave like floating point units.
+///
+/// You can add and subtract two values of the same unit.
 macro_rules! floating_point_unit_impl {
     ($outer : ident) => {
         #[derive(Clone, Copy, Debug, PartialOrd, PartialEq)]

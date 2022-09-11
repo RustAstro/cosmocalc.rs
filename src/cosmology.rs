@@ -6,10 +6,11 @@ pub use omega_factors::OmegaFactors;
 
 use crate::{
     constants::{self, C_M_PER_S, DEFAULT_NEUTRINO_MASSES, DEFAULT_N_EFF},
-    eV, units,
-    units::{FloatingPointUnit, PositiveFloat, Seconds},
-    DimensionlessFloat, DimensionlessPositiveFloat, HInvKmPerSecPerMpc, Kelvin, KmPerSecPerMpc,
-    Mpc, Redshift,
+    eV,
+    units::length::{KILOMETER_TO_METER, MPC_TO_KILOMETERS},
+    units::PositiveFloat,
+    DimensionlessFloat, DimensionlessPositiveFloat, FloatingPointUnit, HInvKmPerSecPerMpc, Kelvin,
+    KilogramsPerMeter3, KmPerSecPerMpc, Mpc, Redshift, Seconds,
 };
 
 /// Represents an FLRW cosmology.
@@ -54,7 +55,7 @@ impl FLRWCosmology {
             reference: None,
             H_0,
             omega,
-            T_CMB0: Some(PositiveFloat::zero()),
+            T_CMB0: Some(Kelvin::zero()),
             N_eff: PositiveFloat::zero(),
             m_nu: vec![],
         }
@@ -86,7 +87,7 @@ impl FLRWCosmology {
             reference,
             H_0,
             omega,
-            T_CMB0: T_CMB0.map(PositiveFloat),
+            T_CMB0: T_CMB0.map(Kelvin),
             N_eff: N_eff.unwrap_or(*DEFAULT_N_EFF),
             m_nu: m_nu.unwrap_or_else(|| DEFAULT_NEUTRINO_MASSES.to_vec()),
         })
@@ -121,14 +122,14 @@ impl FLRWCosmology {
     pub fn hubble_time(&self) -> Seconds {
         // H_0 units are km/s/Mpc so we need to convert Mpc to km
         // such that the distance units cancel
-        PositiveFloat(1. / self.H_0 * units::MPC_TO_KILOMETERS)
+        Seconds::new(1. / self.H_0 * MPC_TO_KILOMETERS)
     }
 
     /// Hubble distance in Mpc: $D_H = c / H_0$.
     pub fn hubble_distance(&self) -> KmPerSecPerMpc {
         // Factor of 1000 to convert c in m/s to c in km/s so that
         // the units cancel.
-        C_M_PER_S / (self.H_0 * units::KILOMETER_TO_METER)
+        C_M_PER_S / (self.H_0 * KILOMETER_TO_METER)
     }
 
     /// Hubble distance in h^{-1} Mpc.
@@ -137,16 +138,16 @@ impl FLRWCosmology {
     }
 
     /// Critical mass density at redshift z.
-    pub fn critical_density(&self, z: Redshift) -> units::KilogramsPerMeter3 {
+    pub fn critical_density(&self, z: Redshift) -> KilogramsPerMeter3 {
         if z == Redshift::zero() {
             PositiveFloat(
                 3. * self.H_0.powf(2.)
-                    / (8. * constants::PI * constants::G * units::MPC_TO_KILOMETERS.powf(2.)),
+                    / (8. * constants::PI * constants::G * MPC_TO_KILOMETERS.powf(2.)),
             )
         } else {
             PositiveFloat(
                 3. * self.H(z).powf(2.)
-                    / (8. * constants::PI * constants::G * units::MPC_TO_KILOMETERS.powf(2.)),
+                    / (8. * constants::PI * constants::G * MPC_TO_KILOMETERS.powf(2.)),
             )
         }
     }
@@ -262,8 +263,8 @@ impl FLRWCosmology {
     /// Neutrino temperature at `z=0`.
     pub fn neutrino_temperature0(&self) -> Kelvin {
         match self.T_CMB0 {
-            Some(T_cmb) => PositiveFloat(T_cmb.0 * (*constants::T_NU_TO_T_GAMMA_RATIO).0),
-            None => DimensionlessPositiveFloat::zero(),
+            Some(T_cmb) => Kelvin(T_cmb.0 * (*constants::T_NU_TO_T_GAMMA_RATIO).0),
+            None => Kelvin::zero(),
         }
     }
 }

@@ -1,6 +1,6 @@
 use cosmocalc::{
     cosmology::{FLRWCosmology, OmegaFactors},
-    DimensionlessPositiveFloat, Redshift, FloatingPointUnit,
+    DimensionlessPositiveFloat, FloatingPointUnit, Redshift,
 };
 
 #[test]
