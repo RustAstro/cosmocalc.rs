@@ -1,11 +1,12 @@
 use anyhow::anyhow;
 
-mod dimensionless;
-mod energy;
-mod length;
+pub mod dimensionless;
+pub mod energy;
+pub mod length;
 pub(crate) mod macros;
-mod time;
-mod traits;
+pub mod mass;
+pub mod time;
+pub mod traits;
 
 pub use dimensionless::DimensionlessFloat;
 pub use traits::FloatingPointUnit;
@@ -17,26 +18,12 @@ pub type DimensionlessPositiveFloat = PositiveFloat;
 pub type Gyr = PositiveFloat;
 pub type Seconds = PositiveFloat;
 
-// Energy
-#[allow(non_camel_case_types)]
-pub type eV = PositiveFloat;
-pub type Joule = PositiveFloat;
-
-// Mass
-pub type Kilogram = PositiveFloat;
-pub type Gram = PositiveFloat;
-
 // Temperatures
 pub type Kelvin = PositiveFloat;
 
 // Hubble parameter units
 pub type KmPerSecPerMpc = f64;
 pub type HInvKmPerSecPerMpc = f64;
-
-// Distances
-pub type Meter = PositiveFloat;
-pub type Km = PositiveFloat;
-pub type Mpc = PositiveFloat;
 
 // Densities
 pub type KilogramsPerMeter3 = PositiveFloat;

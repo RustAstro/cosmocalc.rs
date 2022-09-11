@@ -6,19 +6,14 @@ use crate::{
         JoulePerKelvin, JoulePerMeter3Kelvin4, JouleSeconds, Meters3PerKgPerSecond2,
         MetersPerSecond, PositiveFloat, WattsPerMeters2Kelvin4,
     },
-    DimensionlessPositiveFloat,
+    DimensionlessPositiveFloat, FloatingPointUnit,
 };
 
 pub const PI: f64 = std::f64::consts::PI;
 
 // Neutrinos
-pub static DEFAULT_NEUTRINO_MASSES: Lazy<[eV; 3]> = Lazy::new(|| {
-    [
-        DimensionlessPositiveFloat::zero(),
-        DimensionlessPositiveFloat::zero(),
-        DimensionlessPositiveFloat::zero(),
-    ]
-});
+pub static DEFAULT_NEUTRINO_MASSES: Lazy<[eV; 3]> =
+    Lazy::new(|| [eV::zero(), eV::zero(), eV::zero()]);
 pub static DEFAULT_N_EFF: Lazy<DimensionlessPositiveFloat> =
     Lazy::new(|| DimensionlessPositiveFloat::new(3.04).unwrap()); // WMAP (ApJ Spergel et al 2007)
 

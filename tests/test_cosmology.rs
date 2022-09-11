@@ -1,6 +1,6 @@
 use cosmocalc::{
     cosmology::{FLRWCosmology, OmegaFactors},
-    DimensionlessPositiveFloat,
+    DimensionlessPositiveFloat, Redshift, FloatingPointUnit,
 };
 
 #[test]
@@ -41,6 +41,6 @@ fn densities() {
     let omegas = OmegaFactors::new(0.27, 0.73, 0.044).unwrap();
     let cosmology = FLRWCosmology::new(None, None, 70.0, omegas, None, None, None).unwrap();
 
-    assert!(cosmology.critical_density(0.).0 > 8.7e-27);
-    assert!(cosmology.critical_density(0.).0 < 9.5e-27);
+    assert!(cosmology.critical_density(Redshift::zero()).0 > 8.7e-27);
+    assert!(cosmology.critical_density(Redshift::zero()).0 < 9.5e-27);
 }

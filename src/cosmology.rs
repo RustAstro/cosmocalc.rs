@@ -20,11 +20,10 @@ use crate::{
 /// # Examples
 ///
 /// ```
-/// use cosmocalc::{Distances, FLRWCosmology};
+/// use cosmocalc::{Distances, Redshift, Mpc, FLRWCosmology, FloatingPointUnit};
 ///
 /// let cosmology = FLRWCosmology::two_component(0.286, 0.714, 69.6);
-/// assert!(cosmology.radial_comoving_distance(2.0).0 > 5273.);
-/// assert!(cosmology.radial_comoving_distance(2.0).0 < 5274.);
+/// assert!(cosmology.radial_comoving_distance(Redshift::new(2.0)) > Mpc::new(5273.));
 /// ```
 pub struct FLRWCosmology {
     /// A descriptive name.
@@ -94,11 +93,11 @@ impl FLRWCosmology {
     }
 
     pub fn E(&self, z: Redshift) -> Mpc {
-        PositiveFloat(
-            (self.omega_m0().0 * (1. + z).powf(3.)
-                + self.omega_k0().0 * (1. + z).powf(2.)
+        Mpc::new(
+            (self.omega_m0().0 * (1. + z.0).powf(3.)
+                + self.omega_k0().0 * (1. + z.0).powf(2.)
                 + self.omega_de0().0
-                + (self.omega_gamma0().0 + self.omega_nu0().0) * (1. + z).powf(4.))
+                + (self.omega_gamma0().0 + self.omega_nu0().0) * (1. + z.0).powf(4.))
             .sqrt(),
         )
     }
@@ -110,7 +109,7 @@ impl FLRWCosmology {
 
     /// Scale factor at redshift z.
     pub fn scale_factor(&self, z: Redshift) -> DimensionlessPositiveFloat {
-        PositiveFloat(1.0 / (z + 1.0))
+        PositiveFloat(1.0 / (z.0 + 1.0))
     }
 
     /// Dimensionless hubble parameter h where 100 km/s/Mpc * h = H0
@@ -139,7 +138,7 @@ impl FLRWCosmology {
 
     /// Critical mass density at redshift z.
     pub fn critical_density(&self, z: Redshift) -> units::KilogramsPerMeter3 {
-        if z == 0.0 {
+        if z == Redshift::zero() {
             PositiveFloat(
                 3. * self.H_0.powf(2.)
                     / (8. * constants::PI * constants::G * units::MPC_TO_KILOMETERS.powf(2.)),
@@ -159,7 +158,7 @@ impl FLRWCosmology {
         match self.T_CMB0 {
             Some(T_CMB0) => DimensionlessFloat(
                 *constants::ALPHA * T_CMB0.powf(4.)
-                    / (self.critical_density(0.).0 * C_M_PER_S.powf(2.)),
+                    / (self.critical_density(Redshift::new(0.)).0 * C_M_PER_S.powf(2.)),
             ),
             None => DimensionlessFloat::zero(),
         }
@@ -167,7 +166,7 @@ impl FLRWCosmology {
 
     /// Dimensionless photon density (density/critical density) at `z>0`
     pub fn omega_gamma(&self, z: Redshift) -> DimensionlessFloat {
-        DimensionlessFloat(self.omega_gamma0().0 * (1.0 + z).powf(4.) * 1. / self.E(z).0.powf(2.))
+        DimensionlessFloat(self.omega_gamma0().0 * (1.0 + z.0).powf(4.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless neutrino density (density/critical density) at `z=0`
@@ -182,7 +181,7 @@ impl FLRWCosmology {
 
     /// Dimensionless neutrino density (density/critical density) at `z>0`
     pub fn omega_nu(&self, z: Redshift) -> DimensionlessFloat {
-        DimensionlessFloat(self.omega_nu0().0 * (1.0 + z).powf(4.) * 1. / self.E(z).0.powf(2.))
+        DimensionlessFloat(self.omega_nu0().0 * (1.0 + z.0).powf(4.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless dark matter density (density/critical density) at `z=0`
@@ -192,7 +191,7 @@ impl FLRWCosmology {
 
     /// Dimensionless dark matter density (density/critical density) at `z>0`
     pub fn omega_dm(&self, z: Redshift) -> DimensionlessFloat {
-        DimensionlessFloat(self.omega_dm0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
+        DimensionlessFloat(self.omega_dm0().0 * (1.0 + z.0).powf(3.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless effective curvature density (density/critical density) at `z=0`
@@ -203,7 +202,7 @@ impl FLRWCosmology {
 
     /// Dimensionless effective curvature density (density/critical density) at `z>0`
     pub fn omega_k(&self, z: Redshift) -> DimensionlessFloat {
-        DimensionlessFloat(self.omega_k0().0 * (1.0 + z).powf(2.) * 1. / self.E(z).0.powf(2.))
+        DimensionlessFloat(self.omega_k0().0 * (1.0 + z.0).powf(2.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless matter density (density/critical density) at `z=0`
@@ -213,7 +212,7 @@ impl FLRWCosmology {
 
     /// Dimensionless matter density (density/critical density) at `z>0`
     pub fn omega_m(&self, z: Redshift) -> DimensionlessFloat {
-        DimensionlessFloat(self.omega_m0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
+        DimensionlessFloat(self.omega_m0().0 * (1.0 + z.0).powf(3.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless baryon density (density/critical density) at `z=0`
@@ -223,7 +222,7 @@ impl FLRWCosmology {
 
     /// Dimensionless baryon density (density/critical density) at `z>0`
     pub fn omega_b(&self, z: Redshift) -> DimensionlessFloat {
-        DimensionlessFloat(self.omega_b0().0 * (1.0 + z).powf(3.) * 1. / self.E(z).0.powf(2.))
+        DimensionlessFloat(self.omega_b0().0 * (1.0 + z.0).powf(3.) * 1. / self.E(z).0.powf(2.))
     }
 
     /// Dimensionless dark energy density (density/critical density) at `z=0`

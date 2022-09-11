@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![allow(non_camel_case_types)]
 pub mod constants;
 pub mod cosmology;
 pub mod dark_energy;
@@ -13,6 +14,11 @@ pub use distances::Distances;
 // Common units are re-exported from the crate root for convenience.
 pub use redshift::Redshift;
 pub use units::{
-    eV, DimensionlessFloat, DimensionlessPositiveFloat, HInvKmPerSecPerMpc, Joule, Kelvin,
-    Kilogram, KmPerSecPerMpc, Mpc,
+    energy::{eV, Joule},
+    length::{Kilometer, Meter, Mpc},
+    mass::{Gram, Kilogram},
+    DimensionlessFloat, DimensionlessPositiveFloat, HInvKmPerSecPerMpc, Kelvin, KmPerSecPerMpc,
 };
+
+// Common traits are re-exported from the crate root also.
+pub use crate::units::traits::FloatingPointUnit;
