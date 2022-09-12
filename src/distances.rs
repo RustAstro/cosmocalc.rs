@@ -3,8 +3,8 @@ use crate::{units::FloatingPointUnit, DimensionlessFloat, FLRWCosmology, Mpc, Re
 /// Bin width in redshift integrals.
 const DZ: f64 = 0.0001;
 
-/// Cosmological distances following Hogg 2000
-/// https://arxiv.org/pdf/astro-ph/9905116.pdf
+/// Cosmological distances following [Hogg 2000]
+/// [Hogg 2000]: <https://arxiv.org/pdf/astro-ph/9905116.pdf>
 pub trait Distances {
     /// Line of sight (radial) comoving distance in Megaparsecs.
     fn radial_comoving_distance(&self, z: Redshift) -> Mpc;
