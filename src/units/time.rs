@@ -13,3 +13,9 @@ impl From<Seconds> for Gyr {
         Gyr::new(seconds.0 / SECONDS_PER_GYR)
     }
 }
+
+impl From<Gyr> for Seconds {
+    fn from(gyrs: Gyr) -> Self {
+        Seconds::new(gyrs.0 * SECONDS_PER_GYR)
+    }
+}

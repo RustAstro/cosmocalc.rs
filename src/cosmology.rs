@@ -10,7 +10,7 @@ use crate::{
     units::length::{KILOMETER_TO_METER, MPC_TO_KILOMETERS},
     units::PositiveFloat,
     DimensionlessFloat, DimensionlessPositiveFloat, FloatingPointUnit, Gyr, HInvKmPerSecPerMpc,
-    Kelvin, KilogramsPerMeter3, KmPerSecPerMpc, Mpc, Redshift, Seconds,
+    Kelvin, KilogramsPerMeter3, KmPerSecPerMpc, Meter, Mpc, Redshift, Seconds,
 };
 
 /// Represents an FLRW cosmology.
@@ -137,6 +137,29 @@ impl FLRWCosmology {
         C_M_PER_S / (1.0e5)
     }
 
+    /// CMB temperature at redshift z.
+    pub fn T_CMB(&self, z: Redshift) -> Kelvin {
+        if z == Redshift::zero() {
+            self.T_CMB0.unwrap_or_default()
+        } else {
+            Kelvin::new(self.T_CMB0.unwrap_or_default().0 * (z.0 + 1.))
+        }
+    }
+
+    /// Neutrino temperature at redshift z.
+    pub fn T_nu(&self, z: Redshift) -> Kelvin {
+        let T_nu = match self.T_CMB0 {
+            Some(T_cmb) => Kelvin(T_cmb.0 * (*constants::T_NU_TO_T_GAMMA_RATIO).0),
+            None => Kelvin::zero(),
+        };
+
+        if z == Redshift::zero() {
+            T_nu
+        } else {
+            Kelvin::new(T_nu.0 * (z.0 + 1.))
+        }
+    }
+
     /// Critical mass density at redshift z.
     pub fn critical_density(&self, z: Redshift) -> KilogramsPerMeter3 {
         if z == Redshift::zero() {
@@ -260,14 +283,6 @@ impl FLRWCosmology {
             && self.omega_tot0() == DimensionlessFloat::one()
     }
 
-    /// Neutrino temperature at `z=0`.
-    pub fn neutrino_temperature0(&self) -> Kelvin {
-        match self.T_CMB0 {
-            Some(T_cmb) => Kelvin(T_cmb.0 * (*constants::T_NU_TO_T_GAMMA_RATIO).0),
-            None => Kelvin::zero(),
-        }
-    }
-
     /// Lookback time
     ///
     /// The difference in ages of the universe from now to when the light
@@ -281,5 +296,13 @@ impl FLRWCosmology {
             integrand += (DZ / 2.) / ((1. + z_prime) * self.E(Redshift::new(z_prime)).0);
         }
         Seconds::new(self.hubble_time().0 * integrand).into()
+    }
+
+    /// Lookback distance
+    ///
+    /// Proper distance between now and redshift z
+    pub fn lookback_distance(&self, z: Redshift) -> Mpc {
+        let lookback_time_seconds: Seconds = self.lookback_time(z).into();
+        Meter::new(lookback_time_seconds.0 * constants::C_M_PER_S).into()
     }
 }

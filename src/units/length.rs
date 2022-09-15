@@ -28,3 +28,9 @@ impl From<Mpc> for Kilometer {
         Kilometer(mpc.0 * MPC_TO_KILOMETERS)
     }
 }
+
+impl From<Meter> for Mpc {
+    fn from(meter: Meter) -> Self {
+        Mpc(meter.0 / MPC_TO_METERS)
+    }
+}
