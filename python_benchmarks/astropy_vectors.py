@@ -1,4 +1,5 @@
 from astropy.cosmology import FLRW, FlatLambdaCDM, LambdaCDM, Planck18
+import timeit
 
 def flat_universe_distances_no_relativistic_contribution():
     H0 = 69.6
@@ -62,8 +63,24 @@ def comoving_volume():
    # 1179374442443.6943 Mpc3
 
 
+def bench_luminosity_distance():
+    Om0 = 0.27
+    Ode0 = 0.73
+    Ob0 = 0.044
+    H0 = 70.0
+    cosmo = FlatLambdaCDM(H0, Om0, Ode0, 2.7255, 0, Ob0=Ob0)
+    n = 1
+    print('d_L(z=1): ', timeit.timeit(lambda: cosmo.luminosity_distance(1), number=n)/n, 's')
+    # 50us
+    # Compared to 400us unoptimized Rust
+    print('d_L(z=2): ', timeit.timeit(lambda: cosmo.luminosity_distance(2), number=n)/n, 's')
+    # 23us
+    # Compared to 808us unoptimized Rust
+
+
 if __name__=="__main__":
-    flat_universe_distances_no_relativistic_contribution()
-    flat_universe_distances_with_radiation_but_no_neutrinos()
-    lookback_time()
-    comoving_volume()
+    # flat_universe_distances_no_relativistic_contribution()
+    # flat_universe_distances_with_radiation_but_no_neutrinos()
+    # lookback_time()
+    # comoving_volume()
+    bench_luminosity_distance()

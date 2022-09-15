@@ -20,3 +20,9 @@ criterion = { version = "0.3", features=["html_reports"] }
 [[bench]]
 name = "distances"
 harness = false
+
+[profile.release]
+debug = 1
+
+[rust]
+debuginfo-level = 1

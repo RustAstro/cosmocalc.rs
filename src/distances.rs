@@ -161,6 +161,7 @@ mod tests {
         .unwrap();
 
         // Megaparsecs
+        dbg!(cosmology.radial_comoving_distance(Redshift::new(3.0)));
         assert!(cosmology.radial_comoving_distance(Redshift::new(3.0)) > Mpc::new(6598.));
         assert!(cosmology.radial_comoving_distance(Redshift::new(3.0)) < Mpc::new(6598.5));
         assert!(cosmology.angular_diameter_distance(Redshift::new(3.0)) > Mpc::new(1600.5));
@@ -204,6 +205,18 @@ mod tests {
         let cosmology = FLRWCosmology::two_component(0.286, 0.714, 69.6);
         assert!(cosmology.radial_comoving_distance(Redshift::new(2.0)) > Mpc::new(5273.));
         assert!(cosmology.radial_comoving_distance(Redshift::new(2.0)) < Mpc::new(5274.));
+    }
+
+    /// This test is here for profilng purposes. It runs the luminosity distance computation
+    /// for many iterations such that profiling data can be collected.
+    #[ignore]
+    #[test]
+    fn simple_luminosity() {
+        let omegas = OmegaFactors::new(0.27, 0.73, 0.044).unwrap();
+        let cosmology = FLRWCosmology::new(None, None, 70.0, omegas, None, None, None).unwrap();
+        for _ in 0..10000000 {
+            cosmology.luminosity_distance(Redshift::new(2.0));
+        }
     }
 
     #[test]
