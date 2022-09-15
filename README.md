@@ -29,3 +29,13 @@ This project requires [`Rust`](https://www.rust-lang.org/tools/install). Once in
 cargo build
 cargo test
 ```
+
+## Benchmarks
+
+Run `criterion` benchmarks using:
+
+```
+cargo bench
+```
+
+This will generate a report at `target/criterion/report/index.html`.
