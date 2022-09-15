@@ -31,6 +31,8 @@ pub type JouleSeconds = f64;
 pub type JoulePerMeter3Kelvin4 = f64;
 pub type WattsPerMeters2Kelvin4 = f64;
 pub type JoulePerKelvin = f64;
+pub type Mpc3 = f64;
+pub type HInvMpc = f64;
 
 /// Represents continuous physical quantities that _cannot_ be negative.
 #[derive(Clone, Copy, Debug, PartialOrd, PartialEq)]

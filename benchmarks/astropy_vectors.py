@@ -48,7 +48,22 @@ def lookback_time():
    # 11.641584565145552 Gyr
 
 
+def comoving_volume():
+   Om0 = 0.27
+   Ode0 = 0.73
+   Ob0 = 0.044
+   H0 = 70.0
+   cosmo = FlatLambdaCDM(H0, Om0, Ode0, 2.7255, 0, Ob0=Ob0)
+   print('hubble distance')
+   print(cosmo.hubble_distance)
+   # 4282.749400000001 Mpc
+   print('comoving volume to z=3')
+   print(cosmo.comoving_volume(3))
+   # 1179374442443.6943 Mpc3
+
+
 if __name__=="__main__":
     flat_universe_distances_no_relativistic_contribution()
     flat_universe_distances_with_radiation_but_no_neutrinos()
     lookback_time()
+    comoving_volume()

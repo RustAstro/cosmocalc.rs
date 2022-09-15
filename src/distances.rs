@@ -1,4 +1,8 @@
-use crate::{units::FloatingPointUnit, DimensionlessFloat, FLRWCosmology, Mpc, Redshift};
+use crate::{
+    constants,
+    units::{FloatingPointUnit, Mpc3},
+    DimensionlessFloat, FLRWCosmology, Mpc, Redshift,
+};
 
 /// Bin width in redshift integrals.
 const DZ: f64 = 0.0001;
@@ -17,6 +21,8 @@ pub trait Distances {
     /// This should be used with bolometric quantities, i.e.
     /// it does not include K-corrections.
     fn luminosity_distance(&self, z: Redshift) -> Mpc;
+    /// Comoving volume.
+    fn comoving_volume(&self, z: Redshift) -> Mpc3;
 }
 
 impl Distances for FLRWCosmology {
@@ -27,7 +33,7 @@ impl Distances for FLRWCosmology {
             z_prime += DZ / 2.;
             integrand += (DZ / 2.) / self.E(Redshift::new(z_prime)).0;
         }
-        Mpc::new(self.hubble_distance() * integrand)
+        Mpc::new(self.hubble_distance().0 * integrand)
     }
 
     fn transverse_comoving_distance(&self, z: Redshift) -> Mpc {
@@ -37,8 +43,8 @@ impl Distances for FLRWCosmology {
             // Negative curvature (open)
             let sqrt_omega_k = (omega_k.0).sqrt();
             Mpc::new(
-                self.hubble_distance() * 1. / sqrt_omega_k
-                    * f64::sinh(sqrt_omega_k * radial_comoving.0 / self.hubble_distance()),
+                self.hubble_distance().0 * 1. / sqrt_omega_k
+                    * f64::sinh(sqrt_omega_k * radial_comoving.0 / self.hubble_distance().0),
             )
         } else if omega_k == DimensionlessFloat::zero() {
             // Flat
@@ -47,8 +53,8 @@ impl Distances for FLRWCosmology {
             // Positive curvature (closed)
             let abs_sqrt_omega_k = (-1. * omega_k.0).sqrt();
             Mpc::new(
-                self.hubble_distance() * 1. / abs_sqrt_omega_k
-                    * f64::sin(abs_sqrt_omega_k * radial_comoving.0 / self.hubble_distance()),
+                self.hubble_distance().0 * 1. / abs_sqrt_omega_k
+                    * f64::sin(abs_sqrt_omega_k * radial_comoving.0 / self.hubble_distance().0),
             )
         }
     }
@@ -60,6 +66,40 @@ impl Distances for FLRWCosmology {
     fn luminosity_distance(&self, z: Redshift) -> Mpc {
         // TODO: K-CORRECTIONS
         Mpc::new(self.transverse_comoving_distance(z).0 * (1. + z.0))
+    }
+
+    /// Comoving volume
+    fn comoving_volume(&self, z: Redshift) -> Mpc3 {
+        // KmPerSecPerMpc
+        let d_H = self.hubble_distance().0;
+        let d_H_cubed = d_H.powf(3.);
+
+        let transverse_comoving = self.transverse_comoving_distance(z);
+        let omega_k = self.omega_k(z);
+        if omega_k > DimensionlessFloat::zero() {
+            // Negative curvature (open)
+            let sqrt_omega_k = (omega_k.0).sqrt();
+            let coefficient = 4. * constants::PI * d_H_cubed / (2. * omega_k.0);
+            let term_1_in_parens = transverse_comoving.0 / d_H
+                * (1. + omega_k.0 * transverse_comoving.powf(2.) / d_H.powf(2.)).sqrt();
+            let term_2_in_parens =
+                1. / sqrt_omega_k * f64::asinh(sqrt_omega_k * transverse_comoving.0 / d_H);
+
+            coefficient * (term_1_in_parens - term_2_in_parens)
+        } else if omega_k == DimensionlessFloat::zero() {
+            // Flat
+            4. * constants::PI * transverse_comoving.powf(3.) / 3.
+        } else {
+            // Positive curvature (closed)
+            let sqrt_omega_k = (-1. * omega_k.0).sqrt();
+            let coefficient = 4. * constants::PI * d_H_cubed / (2. * omega_k.0);
+            let term_1_in_parens = transverse_comoving.0 / d_H
+                * (1. + omega_k.0 * transverse_comoving.powf(2.) / d_H.powf(2.)).sqrt();
+            let term_2_in_parens =
+                1. / sqrt_omega_k * f64::asin(sqrt_omega_k * transverse_comoving.0 / d_H);
+
+            coefficient * (term_1_in_parens - term_2_in_parens)
+        }
     }
 }
 
@@ -164,5 +204,14 @@ mod tests {
         let cosmology = FLRWCosmology::two_component(0.286, 0.714, 69.6);
         assert!(cosmology.radial_comoving_distance(Redshift::new(2.0)) > Mpc::new(5273.));
         assert!(cosmology.radial_comoving_distance(Redshift::new(2.0)) < Mpc::new(5274.));
+    }
+
+    #[test]
+    fn comoving_volume() {
+        // TESTED vs: astro.py 5.1 FlatLambdaCDM. Within 10e6 Mpc3.
+        let omegas = OmegaFactors::new(0.27, 0.73, 0.044).unwrap();
+        let cosmology = FLRWCosmology::new(None, None, 70.0, omegas, None, None, None).unwrap();
+        assert!(cosmology.comoving_volume(Redshift::new(3.0)) > 1179361698730.);
+        assert!(cosmology.comoving_volume(Redshift::new(3.0)) < 1179380000000.);
     }
 }

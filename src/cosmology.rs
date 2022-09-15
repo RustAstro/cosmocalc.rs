@@ -8,9 +8,9 @@ use crate::{
     constants::{self, C_M_PER_S, DEFAULT_NEUTRINO_MASSES, DEFAULT_N_EFF},
     eV,
     units::length::{KILOMETER_TO_METER, MPC_TO_KILOMETERS},
-    units::PositiveFloat,
-    DimensionlessFloat, DimensionlessPositiveFloat, FloatingPointUnit, Gyr, HInvKmPerSecPerMpc,
-    Kelvin, KilogramsPerMeter3, KmPerSecPerMpc, Meter, Mpc, Redshift, Seconds,
+    units::{HInvMpc, PositiveFloat},
+    DimensionlessFloat, DimensionlessPositiveFloat, FloatingPointUnit, Gyr, Kelvin,
+    KilogramsPerMeter3, KmPerSecPerMpc, Meter, Mpc, Redshift, Seconds,
 };
 
 /// Represents an FLRW cosmology.
@@ -126,14 +126,14 @@ impl FLRWCosmology {
     }
 
     /// Hubble distance in Mpc: $D_H = c / H_0$.
-    pub fn hubble_distance(&self) -> KmPerSecPerMpc {
+    pub fn hubble_distance(&self) -> Mpc {
         // Factor of 1000 to convert c in m/s to c in km/s so that
         // the units cancel.
-        C_M_PER_S / (self.H_0 * KILOMETER_TO_METER)
+        Mpc::new(C_M_PER_S / (self.H_0 * KILOMETER_TO_METER))
     }
 
     /// Hubble distance in h^{-1} Mpc.
-    pub fn hubble_distance_little_h(&self) -> HInvKmPerSecPerMpc {
+    pub fn hubble_distance_little_h(&self) -> HInvMpc {
         C_M_PER_S / (1.0e5)
     }
 

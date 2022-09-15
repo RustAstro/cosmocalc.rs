@@ -1,6 +1,6 @@
 use cosmocalc::{
     cosmology::{FLRWCosmology, OmegaFactors},
-    DimensionlessPositiveFloat, FloatingPointUnit, Gyr, Redshift,
+    DimensionlessPositiveFloat, FloatingPointUnit, Gyr, Mpc, Redshift,
 };
 
 #[test]
@@ -21,13 +21,13 @@ fn hubble_distance_and_time() {
     assert!(cosmology.hubble_distance_little_h() < 3000.0);
 
     // For H_0 = 70, should be 4285.7 Mpc
-    assert!(cosmology.hubble_distance() > 4000.0);
-    assert!(cosmology.hubble_distance() < 4500.0);
+    assert!(cosmology.hubble_distance() > Mpc::new(4000.0));
+    assert!(cosmology.hubble_distance() < Mpc::new(4500.0));
 
     // D_H in units of h^{-1} Mpc should be equal to D_H in units of Mpc
     assert!(
         cosmology.hubble_distance_little_h()
-            - (cosmology.hubble_distance() * cosmology.little_h().0)
+            - (cosmology.hubble_distance().0 * cosmology.little_h().0)
             < 0.01
     );
 
