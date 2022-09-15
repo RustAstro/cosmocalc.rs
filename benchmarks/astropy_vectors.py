@@ -37,6 +37,18 @@ def flat_universe_distances_with_radiation_but_no_neutrinos():
     # 25594.01963759121 Mpc
 
 
+def lookback_time():
+   Om0 = 0.27
+   Ode0 = 0.73
+   Ob0 = 0.044
+   H0 = 70.0
+   cosmo = FlatLambdaCDM(H0, Om0, Ode0, 2.7255, 0, Ob0=Ob0)
+   print('lookback time to z=3')
+   print(cosmo.lookback_time(3))
+   # 11.641584565145552 Gyr
+
+
 if __name__=="__main__":
     flat_universe_distances_no_relativistic_contribution()
     flat_universe_distances_with_radiation_but_no_neutrinos()
+    lookback_time()

@@ -13,6 +13,9 @@ pub trait Distances {
     /// Angular diameter distance in Megaparsecs.
     fn angular_diameter_distance(&self, z: Redshift) -> Mpc;
     /// Luminosity distance in Megaparsecs.
+    ///
+    /// This should be used with bolometric quantities, i.e.
+    /// it does not include K-corrections.
     fn luminosity_distance(&self, z: Redshift) -> Mpc;
 }
 

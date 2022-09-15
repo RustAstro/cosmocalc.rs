@@ -9,8 +9,8 @@ use crate::{
     eV,
     units::length::{KILOMETER_TO_METER, MPC_TO_KILOMETERS},
     units::PositiveFloat,
-    DimensionlessFloat, DimensionlessPositiveFloat, FloatingPointUnit, HInvKmPerSecPerMpc, Kelvin,
-    KilogramsPerMeter3, KmPerSecPerMpc, Mpc, Redshift, Seconds,
+    DimensionlessFloat, DimensionlessPositiveFloat, FloatingPointUnit, Gyr, HInvKmPerSecPerMpc,
+    Kelvin, KilogramsPerMeter3, KmPerSecPerMpc, Mpc, Redshift, Seconds,
 };
 
 /// Represents an FLRW cosmology.
@@ -266,5 +266,20 @@ impl FLRWCosmology {
             Some(T_cmb) => Kelvin(T_cmb.0 * (*constants::T_NU_TO_T_GAMMA_RATIO).0),
             None => Kelvin::zero(),
         }
+    }
+
+    /// Lookback time
+    ///
+    /// The difference in ages of the universe from now to when the light
+    /// was emitted from the object at `z`.
+    pub fn lookback_time(&self, z: Redshift) -> Gyr {
+        let mut integrand: f64 = 0.0;
+        let mut z_prime = 0.0;
+        let DZ = 0.0001;
+        while z_prime < z.0 {
+            z_prime += DZ / 2.;
+            integrand += (DZ / 2.) / ((1. + z_prime) * self.E(Redshift::new(z_prime)).0);
+        }
+        Seconds::new(self.hubble_time().0 * integrand).into()
     }
 }
