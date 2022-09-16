@@ -7,7 +7,6 @@ pub use omega_factors::OmegaFactors;
 use crate::{
     constants::{self, C_M_PER_S, DEFAULT_NEUTRINO_MASSES, DEFAULT_N_EFF},
     eV,
-    performance::{Z_PLUS_ONE_TO_2_TABLES, Z_PLUS_ONE_TO_3_TABLES, Z_PLUS_ONE_TO_4_TABLES},
     units::length::{KILOMETER_TO_METER, MPC_TO_KILOMETERS},
     units::{HInvMpc, PositiveFloat},
     DimensionlessFloat, DimensionlessPositiveFloat, FloatingPointUnit, Gyr, Kelvin,

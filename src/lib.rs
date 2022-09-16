@@ -4,7 +4,6 @@ pub mod constants;
 pub mod cosmology;
 pub mod dark_energy;
 pub mod distances;
-mod performance;
 pub mod redshift;
 pub mod units;
 
