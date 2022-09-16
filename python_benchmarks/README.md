@@ -1,6 +1,6 @@
 # Benchmarks
 
-We generate test vectors (and eventually benchmarks) against other projects,
+We generate test vectors and benchmarks against other projects,
 currently just astro.py.
 
 Install Python requirements:

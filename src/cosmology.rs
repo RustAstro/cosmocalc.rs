@@ -20,11 +20,54 @@ use crate::{
 ///
 /// # Examples
 ///
+/// Computing cosmological distances with a simple two component FLRW cosmology:
+///
 /// ```
 /// use cosmocalc::{Distances, Redshift, Mpc, FLRWCosmology, FloatingPointUnit};
 ///
+/// let z = Redshift::new(2.0);
+///
 /// let cosmology = FLRWCosmology::two_component(0.286, 0.714, 69.6);
-/// assert!(cosmology.radial_comoving_distance(Redshift::new(2.0)) > Mpc::new(5273.));
+/// let d_c = cosmology.radial_comoving_distance(z);
+/// let d_m = cosmology.transverse_comoving_distance(z);
+/// let d_a = cosmology.angular_diameter_distance(z);
+/// let d_l = cosmology.luminosity_distance(z);
+/// let v = cosmology.comoving_volume(z);
+/// ```
+///
+/// A more complex cosmology specifying the CMB temperature and no neutrinos:
+///
+/// ```
+/// use cosmocalc::{Distances, cosmology::OmegaFactors, Redshift, Mpc, FLRWCosmology, FloatingPointUnit, units::PositiveFloat};
+/// let omega_m = 0.299;
+/// let omega_de = 0.7;
+/// let omega_baryon = 0.05;
+/// let H_0 = 69.6;
+/// let T_CMB0 = 2.7255;
+/// let omegas = OmegaFactors::new(omega_m, omega_de, omega_baryon).unwrap();
+/// let cosmology = FLRWCosmology::new(
+///     None,
+///     None,
+///     H_0,
+///     omegas,
+///     Some(T_CMB0),
+///     Some(PositiveFloat(0.)),
+///     Some(vec![]),
+/// )
+/// .unwrap();
+
+/// let z = Redshift::new(2.0);
+
+/// let t = cosmology.lookback_time(z);
+/// let omega_at_z = cosmology.omega_tot(z);
+/// let omega_de_at_z = cosmology.omega_de(z);
+/// let critical_density_at_z = cosmology.critical_density(z);
+/// let T_CMB_at_z = cosmology.T_CMB(z);
+/// let T_nu_at_z = cosmology.T_nu(z);
+/// let d_H = cosmology.hubble_distance();
+/// let t_H = cosmology.hubble_time();
+/// let expansion_rate_at_z = cosmology.H(z);
+/// let a_z = cosmology.scale_factor(z);
 /// ```
 pub struct FLRWCosmology {
     /// A descriptive name.
