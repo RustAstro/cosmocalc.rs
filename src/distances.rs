@@ -27,20 +27,22 @@ pub trait Distances {
 
 impl Distances for FLRWCosmology {
     fn radial_comoving_distance(&self, z: Redshift) -> Mpc {
+        // TODO: To speed up further pick x equal size bins
         // We operate over 1e4
         let max_range = (z.0 as i64) * 10000;
         let step = DZ;
+        // Quantity inside the sqrt is E()
         let integrand: f64 = (0..max_range)
-            .map(|z_prime_e4| step / self.E(Redshift::new(z_prime_e4 as f64 / 10000.)).0)
+            .map(|z_prime_e4| {
+                step / (self.omega.Omega_M0.0 * (1. + z_prime_e4 as f64 / 10000.).powi(3)
+                    + self.omega_k0.0 * (1. + z_prime_e4 as f64 / 10000.).powi(2)
+                    + self.omega.Omega_DE0.0
+                    + (self.omega_gamma0.0 + self.omega_nu0.0)
+                        * (1. + z_prime_e4 as f64 / 10000.).powi(4))
+                .sqrt()
+            })
             .sum();
-        /*
-        Function body of E():
-        (self.omega.Omega_M0.0 * (1. + z.0).powi(3)
-                + self.omega_k0.0 * (1. + z.0).powi(2)
-                + self.omega.Omega_DE0.0
-                + (self.omega_gamma0.0 + self.omega_nu0.0) * (1. + z.0).powi(4))
-            .sqrt()
-        */
+
         Mpc::new(self.hubble_distance().0 * integrand)
     }
 
@@ -220,8 +222,7 @@ mod tests {
     fn simple_luminosity() {
         let omegas = OmegaFactors::new(0.27, 0.73, 0.044).unwrap();
         let cosmology = FLRWCosmology::new(None, None, 70.0, omegas, None, None, None).unwrap();
-        //for _ in 0..10000000 {
-        for _ in 0..1 {
+        for _ in 0..10000000 {
             cosmology.luminosity_distance(Redshift::new(2.0));
         }
     }
