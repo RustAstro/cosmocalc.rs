@@ -72,7 +72,7 @@ impl Distances for FLRWCosmology {
     fn comoving_volume(&self, z: Redshift) -> Mpc3 {
         // KmPerSecPerMpc
         let d_H = self.hubble_distance().0;
-        let d_H_cubed = d_H.powf(3.);
+        let d_H_cubed = d_H.powi(3);
 
         let transverse_comoving = self.transverse_comoving_distance(z);
         let omega_k = self.omega_k(z);
@@ -81,20 +81,20 @@ impl Distances for FLRWCosmology {
             let sqrt_omega_k = (omega_k.0).sqrt();
             let coefficient = 4. * constants::PI * d_H_cubed / (2. * omega_k.0);
             let term_1_in_parens = transverse_comoving.0 / d_H
-                * (1. + omega_k.0 * transverse_comoving.powf(2.) / d_H.powf(2.)).sqrt();
+                * (1. + omega_k.0 * transverse_comoving.powi(2) / d_H.powi(2)).sqrt();
             let term_2_in_parens =
                 1. / sqrt_omega_k * f64::asinh(sqrt_omega_k * transverse_comoving.0 / d_H);
 
             coefficient * (term_1_in_parens - term_2_in_parens)
         } else if omega_k == DimensionlessFloat::zero() {
             // Flat
-            4. * constants::PI * transverse_comoving.powf(3.) / 3.
+            4. * constants::PI * transverse_comoving.powi(3) / 3.
         } else {
             // Positive curvature (closed)
             let sqrt_omega_k = (-1. * omega_k.0).sqrt();
             let coefficient = 4. * constants::PI * d_H_cubed / (2. * omega_k.0);
             let term_1_in_parens = transverse_comoving.0 / d_H
-                * (1. + omega_k.0 * transverse_comoving.powf(2.) / d_H.powf(2.)).sqrt();
+                * (1. + omega_k.0 * transverse_comoving.powi(2) / d_H.powi(2)).sqrt();
             let term_2_in_parens =
                 1. / sqrt_omega_k * f64::asin(sqrt_omega_k * transverse_comoving.0 / d_H);
 

@@ -49,7 +49,7 @@ pub static T_NU_TO_T_GAMMA_RATIO: Lazy<DimensionlessPositiveFloat> =
 ///
 /// Eqn 2.29 from Ryden
 pub static ALPHA: Lazy<JoulePerMeter3Kelvin4> =
-    Lazy::new(|| PI.powf(2.) * BOLTZMANN.powf(4.) / (15. * H_BAR.powf(3.) * C_M_PER_S.powf(3.)));
+    Lazy::new(|| PI.powi(2) * BOLTZMANN.powi(4) / (15. * H_BAR.powi(3) * C_M_PER_S.powi(3)));
 
 #[cfg(test)]
 mod tests {

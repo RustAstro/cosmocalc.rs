@@ -28,8 +28,13 @@ pub trait FloatingPointUnit {
         self.inner().floor()
     }
 
-    /// The inner part of this value raised to a power.
+    /// The inner part of this value raised to a fp power.
     fn powf(&self, exp: f64) -> f64 {
         self.inner().powf(exp)
+    }
+
+    /// The inner part of this value raised to an integer.
+    fn powi(&self, exp: i32) -> f64 {
+        self.inner().powi(exp)
     }
 }

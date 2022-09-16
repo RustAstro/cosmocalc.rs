@@ -71,10 +71,10 @@ def bench_luminosity_distance():
     cosmo = FlatLambdaCDM(H0, Om0, Ode0, 2.7255, 0, Ob0=Ob0)
     n = 1
     print('d_L(z=1): ', timeit.timeit(lambda: cosmo.luminosity_distance(1), number=n)/n, 's')
-    # 50us
+    # 35us
     # Compared to 400us unoptimized Rust
     print('d_L(z=2): ', timeit.timeit(lambda: cosmo.luminosity_distance(2), number=n)/n, 's')
-    # 23us
+    # 70us
     # Compared to 808us unoptimized Rust
 
 

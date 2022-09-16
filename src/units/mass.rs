@@ -12,14 +12,14 @@ floating_point_unit_impl! { Gram }
 impl From<Joule> for Kilogram {
     fn from(energy: Joule) -> Self {
         // Convert between energy and mass using $E=mc^2$
-        Kilogram::new(energy.0 / (constants::C_M_PER_S).powf(2.))
+        Kilogram::new(energy.0 / (constants::C_M_PER_S).powi(2))
     }
 }
 
 impl From<Kilogram> for Joule {
     fn from(mass: Kilogram) -> Self {
         // Convert between energy and mass using $E=mc^2$
-        Joule::new(mass.0 * (constants::C_M_PER_S).powf(2.))
+        Joule::new(mass.0 * (constants::C_M_PER_S).powi(2))
     }
 }
 
