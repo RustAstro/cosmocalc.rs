@@ -1,6 +1,6 @@
 [package]
 name = "cosmocalc"
-version = "0.1.0"
+version = "0.2.0"
 authors = [ "redshiftzero" ]
 description = "A library for cosmological physics calculations"
 repository = "https://github.com/redshiftzero/cosmocalc.rs"
@@ -19,6 +19,7 @@ criterion = { version = "0.3", features=["html_reports"] }
 
 [[bench]]
 name = "distances"
+path = "benches/distances.rs"
 harness = false
 
 [profile.release]
