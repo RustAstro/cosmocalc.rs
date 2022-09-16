@@ -1,4 +1,4 @@
-use crate::DimensionlessFloat;
+use crate::{units::FloatingPointUnit, DimensionlessFloat};
 
 /// Represents a collection of dimensionless density parameters.
 pub struct OmegaFactors {
@@ -17,9 +17,9 @@ impl OmegaFactors {
         }
 
         Ok(OmegaFactors {
-            Omega_M0: DimensionlessFloat::new(Omega_M0)?,
-            Omega_DE0: DimensionlessFloat::new(Omega_DE0)?,
-            Omega_b0: DimensionlessFloat::new(Omega_b0)?,
+            Omega_M0: DimensionlessFloat::new(Omega_M0),
+            Omega_DE0: DimensionlessFloat::new(Omega_DE0),
+            Omega_b0: DimensionlessFloat::new(Omega_b0),
         })
     }
 

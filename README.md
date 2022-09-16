@@ -16,8 +16,7 @@ A library for computing quantities in cosmology in the Rust programming language
 
 ```rust
 let cosmology = FLRWCosmology::two_component(0.286, 0.714, 69.6);
-assert!(cosmology.radial_comoving_distance(2.0).0 > 5273.);
-assert!(cosmology.radial_comoving_distance(2.0).0 < 5274.); 
+assert!(cosmology.radial_comoving_distance(Redshift::new(2.0)) > Mpc::new(5273.));
 ```
 
 # Developers
@@ -30,3 +29,13 @@ This project requires [`Rust`](https://www.rust-lang.org/tools/install). Once in
 cargo build
 cargo test
 ```
+
+## Benchmarks
+
+Run `criterion` benchmarks using:
+
+```
+cargo bench
+```
+
+This will generate a report at `target/criterion/report/index.html`.
